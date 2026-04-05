@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scrapbook</title>
+  </head>
+  <body style="margin:0;background:#11111b;color:#cdd6f4;font-family:monospace">
+    <div id="root"></div>
+    <div id="error-display" style="display:none;padding:20px;white-space:pre-wrap"></div>
+    <script>
+      window.addEventListener("error", (e) => {
+        const el = document.getElementById("error-display");
+        el.style.display = "block";
+        el.textContent += e.message + "\n" + (e.filename || "") + ":" + (e.lineno || "") + "\n\n";
+      });
+      window.addEventListener("unhandledrejection", (e) => {
+        const el = document.getElementById("error-display");
+        el.style.display = "block";
+        el.textContent += "Promise: " + (e.reason?.message || e.reason) + "\n" + (e.reason?.stack || "") + "\n\n";
+      });
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
