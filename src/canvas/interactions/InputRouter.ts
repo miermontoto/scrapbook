@@ -1,5 +1,5 @@
 import { useAppStore } from "../../stores";
-import { TerminalManager } from "../../terminal/TerminalManager";
+import { km } from "../../keybindings/KeybindingManager";
 
 /**
  * maneja shortcuts globales. el input de terminal ahora lo maneja
@@ -27,8 +27,7 @@ export class InputRouter {
 
     // --- shortcuts globales (funcionan siempre) ---
 
-    // Ctrl+T: nuevo terminal
-    if (e.ctrlKey && !e.shiftKey && e.code === "KeyT") {
+    if (km.matchesKey("newTerminal", e)) {
       e.preventDefault();
       e.stopPropagation();
       if (useAppStore.getState().settings.spawnAtMouse) {
@@ -39,8 +38,7 @@ export class InputRouter {
       return;
     }
 
-    // Ctrl+Q: cerrar terminal enfocado
-    if (e.ctrlKey && !e.shiftKey && e.code === "KeyQ") {
+    if (km.matchesKey("closeTerminal", e)) {
       e.preventDefault();
       e.stopPropagation();
       const focusedId = useAppStore.getState().focusedTerminalId;
@@ -50,16 +48,14 @@ export class InputRouter {
       return;
     }
 
-    // Ctrl+,: abrir settings
-    if (e.ctrlKey && (e.code === "Comma" || e.key === ",")) {
+    if (km.matchesKey("toggleSettings", e)) {
       e.preventDefault();
       e.stopPropagation();
       useAppStore.getState().toggleSettings();
       return;
     }
 
-    // Escape: cerrar settings o deseleccionar
-    if (e.code === "Escape") {
+    if (km.matchesKey("deselect", e)) {
       if (useAppStore.getState().settingsOpen) {
         useAppStore.getState().setSettingsOpen(false);
         return;
@@ -70,11 +66,9 @@ export class InputRouter {
     }
 
     // --- shortcuts que solo funcionan cuando NO hay terminal enfocado ---
-    // todo lo demas pasa a xterm cuando hay un terminal enfocado
     if (hasFocusedTerminal) return;
 
-    // Delete para eliminar nodos seleccionados
-    if (e.code === "Delete") {
+    if (km.matchesKey("deleteSelected", e)) {
       const selected = useAppStore.getState().selectedNodeIds;
       for (const nodeId of selected) {
         useAppStore.getState().removeNode(nodeId);
@@ -94,7 +88,6 @@ export class InputRouter {
   private addTerminalAtMouse() {
     const { screenToWorld } = useAppStore.getState();
     const world = screenToWorld(this.mouseX, this.mouseY);
-    // centrar el terminal en la posicion del mouse
     useAppStore.getState().addNode("terminal", world.x - 360, world.y - 240);
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useAppStore } from "../stores";
+import { KeybindingsPanel } from "./KeybindingsPanel";
 import type { AppSettings } from "../stores/settingsSlice";
 
 export function SettingsPanel() {
@@ -39,104 +40,137 @@ export function SettingsPanel() {
           </button>
         </div>
 
-        <div style={scrollStyle}>
-          <Section title="Terminal">
-            <Field label="Font family">
-              <input
-                type="text"
-                value={settings.terminalFontFamily}
-                onChange={(e) => update({ terminalFontFamily: e.target.value })}
-                style={inputStyle}
-              />
-            </Field>
-            <Field label="Font size">
-              <NumberInput
-                value={settings.terminalFontSize}
-                min={8}
-                max={32}
-                onChange={(v) => update({ terminalFontSize: v })}
-              />
-            </Field>
-            <Field label="Scrollback lines">
-              <NumberInput
-                value={settings.terminalScrollback}
-                min={100}
-                max={10000}
-                step={100}
-                onChange={(v) => update({ terminalScrollback: v })}
-              />
-            </Field>
-            <Field label="Cursor style">
-              <Select
-                value={settings.terminalCursorStyle}
-                options={["block", "underline", "bar"]}
-                onChange={(v) =>
-                  update({
-                    terminalCursorStyle: v as AppSettings["terminalCursorStyle"],
-                  })
-                }
-              />
-            </Field>
-            <Field label="Default shell">
-              <input
-                type="text"
-                value={settings.defaultShell}
-                onChange={(e) => update({ defaultShell: e.target.value })}
-                placeholder="(system default)"
-                style={inputStyle}
-              />
-            </Field>
-          </Section>
+        <div style={columnsStyle}>
+          {/* columna izquierda: settings */}
+          <div style={columnStyle}>
+            <Section title="Terminal">
+              <Field label="Font family">
+                <input
+                  type="text"
+                  value={settings.terminalFontFamily}
+                  onChange={(e) => update({ terminalFontFamily: e.target.value })}
+                  style={inputStyle}
+                />
+              </Field>
+              <Field label="Font size">
+                <NumberInput
+                  value={settings.terminalFontSize}
+                  min={8}
+                  max={32}
+                  onChange={(v) => update({ terminalFontSize: v })}
+                />
+              </Field>
+              <Field label="Scrollback lines">
+                <NumberInput
+                  value={settings.terminalScrollback}
+                  min={100}
+                  max={10000}
+                  step={100}
+                  onChange={(v) => update({ terminalScrollback: v })}
+                />
+              </Field>
+              <Field label="Cursor style">
+                <Select
+                  value={settings.terminalCursorStyle}
+                  options={["block", "underline", "bar"]}
+                  onChange={(v) =>
+                    update({
+                      terminalCursorStyle: v as AppSettings["terminalCursorStyle"],
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Default shell">
+                <input
+                  type="text"
+                  value={settings.defaultShell}
+                  onChange={(e) => update({ defaultShell: e.target.value })}
+                  placeholder="(system default)"
+                  style={inputStyle}
+                />
+              </Field>
+            </Section>
 
-          <Section title="Behavior">
-            <Field label="Focus on hover">
-              <Toggle
-                value={settings.focusOnHover}
-                onChange={(v) => update({ focusOnHover: v })}
-              />
-            </Field>
-            <Field label="Spawn at mouse">
-              <Toggle
-                value={settings.spawnAtMouse}
-                onChange={(v) => update({ spawnAtMouse: v })}
-              />
-            </Field>
-          </Section>
+            <Section title="Behavior">
+              <Field label="Focus on hover">
+                <Toggle
+                  value={settings.focusOnHover}
+                  onChange={(v) => update({ focusOnHover: v })}
+                />
+              </Field>
+              <Field label="Spawn at mouse">
+                <Toggle
+                  value={settings.spawnAtMouse}
+                  onChange={(v) => update({ spawnAtMouse: v })}
+                />
+              </Field>
+            </Section>
 
-          <Section title="Appearance">
-            <Field label="Canvas background">
-              <ColorInput
-                value={settings.canvasBackground}
-                onChange={(v) => update({ canvasBackground: v })}
-              />
-            </Field>
-            <Field label="Grid dot color">
-              <ColorInput
-                value={settings.gridDotColor}
-                onChange={(v) => update({ gridDotColor: v })}
-              />
-            </Field>
-            <Field label="Grid major dot color">
-              <ColorInput
-                value={settings.gridMajorDotColor}
-                onChange={(v) => update({ gridMajorDotColor: v })}
-              />
-            </Field>
-            <Field label="Grid spacing">
-              <NumberInput
-                value={settings.gridSize}
-                min={10}
-                max={100}
-                onChange={(v) => update({ gridSize: v })}
-              />
-            </Field>
-            <Field label="Node border color">
-              <ColorInput
-                value={settings.nodeBorderColor}
-                onChange={(v) => update({ nodeBorderColor: v })}
-              />
-            </Field>
-          </Section>
+            <Section title="Snapping">
+              <Field label="Magnetic snap">
+                <Toggle
+                  value={settings.magneticSnap}
+                  onChange={(v) => update({ magneticSnap: v })}
+                />
+              </Field>
+              <Field label="Grid snap">
+                <Toggle
+                  value={settings.gridSnap}
+                  onChange={(v) => update({ gridSnap: v })}
+                />
+              </Field>
+              <Field label="Snap threshold (px)">
+                <NumberInput
+                  value={settings.snapThreshold}
+                  min={4}
+                  max={24}
+                  onChange={(v) => update({ snapThreshold: v })}
+                />
+              </Field>
+            </Section>
+
+            <Section title="Appearance">
+              <Field label="Canvas background">
+                <ColorInput
+                  value={settings.canvasBackground}
+                  onChange={(v) => update({ canvasBackground: v })}
+                />
+              </Field>
+              <Field label="Grid dot color">
+                <ColorInput
+                  value={settings.gridDotColor}
+                  onChange={(v) => update({ gridDotColor: v })}
+                />
+              </Field>
+              <Field label="Grid major dot color">
+                <ColorInput
+                  value={settings.gridMajorDotColor}
+                  onChange={(v) => update({ gridMajorDotColor: v })}
+                />
+              </Field>
+              <Field label="Grid spacing">
+                <NumberInput
+                  value={settings.gridSize}
+                  min={10}
+                  max={100}
+                  onChange={(v) => update({ gridSize: v })}
+                />
+              </Field>
+              <Field label="Node border color">
+                <ColorInput
+                  value={settings.nodeBorderColor}
+                  onChange={(v) => update({ nodeBorderColor: v })}
+                />
+              </Field>
+            </Section>
+          </div>
+
+          {/* columna derecha: keybindings */}
+          <div style={{ ...columnStyle, borderLeft: "1px solid #313244" }}>
+            <Section title="Keybindings">
+              <KeybindingsPanel />
+            </Section>
+          </div>
         </div>
       </div>
     </div>
@@ -314,12 +348,24 @@ const backdropStyle: React.CSSProperties = {
 const panelStyle: React.CSSProperties = {
   background: "#1e1e2e",
   border: "1px solid #313244",
-  width: 420,
+  width: 780,
   maxHeight: "80vh",
   display: "flex",
   flexDirection: "column",
   color: "#cdd6f4",
   fontFamily: "Inter, system-ui, sans-serif",
+};
+
+const columnsStyle: React.CSSProperties = {
+  display: "flex",
+  flex: 1,
+  overflow: "hidden",
+};
+
+const columnStyle: React.CSSProperties = {
+  flex: 1,
+  padding: 16,
+  overflowY: "auto",
 };
 
 const headerStyle: React.CSSProperties = {
@@ -337,12 +383,6 @@ const closeBtnStyle: React.CSSProperties = {
   fontSize: 20,
   cursor: "pointer",
   padding: "0 4px",
-};
-
-const scrollStyle: React.CSSProperties = {
-  padding: 16,
-  overflowY: "auto",
-  flex: 1,
 };
 
 const fieldStyle: React.CSSProperties = {

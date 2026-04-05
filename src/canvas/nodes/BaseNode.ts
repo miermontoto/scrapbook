@@ -1,5 +1,7 @@
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { useAppStore } from "../../stores";
+import { DragCoordinator } from "../interactions/DragInteraction";
+import { km } from "../../keybindings/KeybindingManager";
 import type { NodeData } from "../../types/node";
 
 const TITLE_BAR_HEIGHT = 28;
@@ -142,7 +144,7 @@ export abstract class BaseNode extends Container {
     this.background.eventMode = "static";
     this.background.on("pointerdown", (e) => {
       e.stopPropagation();
-      useAppStore.getState().selectNode(this.nodeId, e.shiftKey);
+      useAppStore.getState().selectNode(this.nodeId, km.matchesModifier("multiSelectMod", e));
       useAppStore.getState().bringToFront(this.nodeId);
       this.onFocus();
     });
@@ -160,7 +162,7 @@ export abstract class BaseNode extends Container {
       const dy = (globalY - this.dragStartGlobalY) / zoom;
       const newX = this.dragStartNodeX + dx;
       const newY = this.dragStartNodeY + dy;
-      useAppStore.getState().moveNode(this.nodeId, newX, newY);
+      DragCoordinator.getInstance().handleDragMove(this.nodeId, newX, newY);
     }
     if (this.isResizing) {
       const zoom = useAppStore.getState().zoom;
@@ -168,12 +170,15 @@ export abstract class BaseNode extends Container {
       const dy = (globalY - this.resizeStartGlobalY) / zoom;
       const newW = Math.max(MIN_WIDTH, this.resizeStartW + dx);
       const newH = Math.max(MIN_HEIGHT, this.resizeStartH + dy);
-      useAppStore.getState().resizeNode(this.nodeId, newW, newH);
+      DragCoordinator.getInstance().handleResizeMove(this.nodeId, newW, newH);
     }
   }
 
   onGlobalPointerUp() {
     if (this.isDragging || this.isResizing) {
+      if (this.isDragging) {
+        DragCoordinator.getInstance().handleDragEnd();
+      }
       this.isDragging = false;
       this.isResizing = false;
       useAppStore.getState().setDirty();

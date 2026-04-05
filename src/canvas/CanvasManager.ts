@@ -1,10 +1,13 @@
 import { Application } from "pixi.js";
 import { LayerManager } from "./layers/LayerManager";
 import { GridRenderer } from "./GridRenderer";
+import { AlignmentGuideRenderer } from "./AlignmentGuideRenderer";
 import { ViewportController } from "./ViewportController";
 import { InputRouter } from "./interactions/InputRouter";
+import { DragCoordinator } from "./interactions/DragInteraction";
 import { createNode } from "./nodes/NodeFactory";
 import { useAppStore } from "../stores";
+import { km } from "../keybindings/KeybindingManager";
 import type { BaseNode } from "./nodes/BaseNode";
 import type { NodeData } from "../types/node";
 
@@ -17,6 +20,7 @@ export class CanvasManager {
   private nodeViews = new Map<string, BaseNode>();
   private unsubscribers: Array<() => void> = [];
   private resizeObserver: ResizeObserver | null = null;
+  private guideRenderer: AlignmentGuideRenderer | null = null;
   private _isReady = false;
 
   get isReady() {
@@ -31,7 +35,11 @@ export class CanvasManager {
       antialias: true,
       autoDensity: true,
       resolution: window.devicePixelRatio,
+      preference: "webgl",
     });
+
+    // desbloquear framerate para monitores de alta frecuencia (144/240hz)
+    this.app.ticker.maxFPS = 0;
 
     container.appendChild(this.app.canvas as HTMLCanvasElement);
 
@@ -41,8 +49,15 @@ export class CanvasManager {
     this.layers = new LayerManager(this.app.stage);
     this.layers.nodeLayer.sortableChildren = true;
     this.grid = new GridRenderer(this.layers.gridLayer);
+    this.guideRenderer = new AlignmentGuideRenderer(this.layers.overlayLayer);
     this.viewport = new ViewportController(canvas);
     this.inputRouter = new InputRouter();
+
+    // conectar coordinator de drag con el renderer de guias
+    DragCoordinator.getInstance().setGuidesCallback((guides) => {
+      const { viewportX, viewportY, zoom } = useAppStore.getState();
+      this.guideRenderer?.update(guides, viewportX, viewportY, zoom);
+    });
 
     // tamano inicial
     const { width, height } = container.getBoundingClientRect();
@@ -76,7 +91,7 @@ export class CanvasManager {
 
     // click en el fondo para deseleccionar
     canvas.addEventListener("pointerdown", (e) => {
-      if (e.button === 0 && !e.shiftKey) {
+      if (km.matchesMouse("deselectClick", e) && !km.matchesModifier("multiSelectMod", e)) {
         // verificar si el click fue en un nodo via PixiJS hit test
         const point = { x: e.offsetX, y: e.offsetY };
         const hit = this.app?.stage.children.some((layer) => {
@@ -214,6 +229,7 @@ export class CanvasManager {
 
     this.inputRouter?.destroy();
     this.viewport?.destroy();
+    this.guideRenderer?.destroy();
     this.grid?.destroy();
     this.app?.destroy(true);
   }

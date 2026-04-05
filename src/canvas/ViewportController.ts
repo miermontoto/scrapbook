@@ -1,4 +1,5 @@
 import { useAppStore } from "../stores";
+import { km } from "../keybindings/KeybindingManager";
 
 const ZOOM_SPEED = 0.001;
 const MIN_ZOOM = 0.1;
@@ -9,9 +10,8 @@ export class ViewportController {
   private isPanning = false;
   private lastX = 0;
   private lastY = 0;
-  private spaceHeld = false;
+  private heldKeys = new Set<string>();
 
-  // handlers con bind para poder removerlos
   private onWheel: (e: WheelEvent) => void;
   private onPointerDown: (e: PointerEvent) => void;
   private onPointerMove: (e: PointerEvent) => void;
@@ -48,8 +48,10 @@ export class ViewportController {
   }
 
   private handlePointerDown(e: PointerEvent) {
-    // boton central o space + click izquierdo
-    if (e.button === 1 || (e.button === 0 && this.spaceHeld)) {
+    if (
+      km.matchesMouse("panDrag", e) ||
+      km.matchesMouse("panDragAlt", e, this.heldKeys)
+    ) {
       this.isPanning = true;
       this.lastX = e.clientX;
       this.lastY = e.clientY;
@@ -70,20 +72,25 @@ export class ViewportController {
   private handlePointerUp(_e: PointerEvent) {
     if (this.isPanning) {
       this.isPanning = false;
-      this.canvas.style.cursor = this.spaceHeld ? "grab" : "default";
+      this.canvas.style.cursor = this.heldKeys.size > 0 ? "grab" : "default";
     }
   }
 
   private handleKeyDown(e: KeyboardEvent) {
-    if (e.code === "Space" && !e.repeat) {
-      this.spaceHeld = true;
+    if (e.repeat) return;
+    const key = e.key.toLowerCase() === " " ? "space" : e.key.toLowerCase();
+    this.heldKeys.add(key);
+
+    if (km.matchesKey("panHold", e)) {
       this.canvas.style.cursor = "grab";
     }
   }
 
   private handleKeyUp(e: KeyboardEvent) {
-    if (e.code === "Space") {
-      this.spaceHeld = false;
+    const key = e.key.toLowerCase() === " " ? "space" : e.key.toLowerCase();
+    this.heldKeys.delete(key);
+
+    if (km.matchesKey("panHold", e)) {
       if (!this.isPanning) {
         this.canvas.style.cursor = "default";
       }

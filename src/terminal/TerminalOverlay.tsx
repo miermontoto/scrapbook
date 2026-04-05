@@ -1,6 +1,7 @@
 import { useEffect, useRef, useMemo, useCallback, useState } from "react";
 import { useAppStore } from "../stores";
 import { TerminalManager } from "./TerminalManager";
+import { DragCoordinator } from "../canvas/interactions/DragInteraction";
 import type { NodeData } from "../types/node";
 
 const TITLE_BAR_HEIGHT = 28;
@@ -154,12 +155,13 @@ function OverlayItem({
       const onMove = (me: PointerEvent) => {
         const dx = (me.clientX - startX) / zoom;
         const dy = (me.clientY - startY) / zoom;
-        useAppStore.getState().moveNode(node.id, startNodeX + dx, startNodeY + dy);
+        DragCoordinator.getInstance().handleDragMove(node.id, startNodeX + dx, startNodeY + dy);
       };
 
       const onUp = () => {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
+        DragCoordinator.getInstance().handleDragEnd();
         useAppStore.getState().setDirty();
       };
 
@@ -204,7 +206,7 @@ function OverlayItem({
         const dy = (me.clientY - startY) / zoom;
         const newW = Math.max(200, startW + dx);
         const newH = Math.max(150, startH + dy);
-        useAppStore.getState().resizeNode(node.id, newW, newH);
+        DragCoordinator.getInstance().handleResizeMove(node.id, newW, newH);
       };
 
       const onUp = () => {

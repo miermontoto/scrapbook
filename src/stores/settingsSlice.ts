@@ -11,12 +11,18 @@ export interface AppSettings {
   // comportamiento
   focusOnHover: boolean;
   spawnAtMouse: boolean;
+  // snapping
+  magneticSnap: boolean;
+  gridSnap: boolean;
+  snapThreshold: number;
   // apariencia
   canvasBackground: string;
   gridDotColor: string;
   gridMajorDotColor: string;
   gridSize: number;
   nodeBorderColor: string;
+  // keybindings (solo overrides, vacio = usar defaults)
+  keybindings: Record<string, string>;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -28,11 +34,15 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultShell: "",
   focusOnHover: true,
   spawnAtMouse: true,
+  magneticSnap: true,
+  gridSnap: false,
+  snapThreshold: 10,
   canvasBackground: "#11111b",
   gridDotColor: "#313244",
   gridMajorDotColor: "#45475a",
   gridSize: 40,
   nodeBorderColor: "#313244",
+  keybindings: {},
 };
 
 export interface SettingsSlice {
